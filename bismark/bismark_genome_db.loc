@@ -1,0 +1,19 @@
+#
+# bismark genome db configuration
+#
+#
+#
+#<name>	<bowtie_version>^<db_file_path>	<dbkey>
+#
+#hg19canonical_bt1	bowtie1	/data2/galaxy/galaxy-data/bismark_0.7.4/hg19_canonical	hg19
+#
+hg19canonical_bt1	bowtie1	/data2/galaxy/galaxy-data/bismark_0.7.4/hg19_canonical	hg19
+hg19full_bt1	bowtie1	/data2/galaxy/galaxy-data/bismark_0.7.4/hg19_broad_full	hg19
+hg19canonical_bt2	bowtie2	/data2/galaxy/galaxy-data/bismark_0.7.4/hg19_canonical_bt2	hg19
+hg19full_bt2	bowtie2	/data2/galaxy/galaxy-data/bismark_0.7.4/hg19_broad_full_bt2	hg19
+#
+mm9canonical_bt1	bowtie1	/data2/galaxy/galaxy-data/bismark_0.7.4/mm9_canonical	mm9
+mm9full_bt1	bowtie1	/data2/galaxy/galaxy-data/bismark_0.7.4/mm9_full	mm9
+mm9canonical_bt2	bowtie2	/data2/galaxy/galaxy-data/bismark_0.7.4/mm9_canonical_bt2	mm9
+mm9full_bt2	bowtie2	/data2/galaxy/galaxy-data/bismark_0.7.4/mm9/mm9_full_bt2	mm9
+#

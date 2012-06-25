@@ -1,0 +1,219 @@
+<tool id="bismark" name="bismark" version="1.0.1">
+  <requirements><requirement type='package'>bismark</requirement></requirements>
+  <description>Bismark Bisulfite Mapper</description>
+  <command>bismark --temp_dir ${result_outfile.files_path} --output_dir ${result_outfile.files_path}
+  #if str( $db_type.options_type_selector ) == 'bowtie1':
+      #if str( $db_type.options_type.options_type_selector ) == 'advanced':
+  --${db_type.options_type.fastq_qualities_type_value}
+          #if str( $db_type.options_type.s_value ) != 'none':
+  -s ${db_type.options_type.s_value}
+          #end if
+          #if str( $db_type.options_type.u_value ) != 'none':
+  -u ${db_type.options_type.u_value}
+          #end if
+          #if str( $db_type.options_type.nondirectional_value ) == 'enable':
+  --non_directional
+          #end if
+          #if str( $db_type.options_type.samnohd_value ) == 'enable':
+  --sam-no-hd
+          #end if
+          #if str( $db_type.options_type.n_value ) != 'none':
+  -n ${db_type.options_type.n_value}
+          #end if
+          #if str( $db_type.options_type.l_value ) != 'none':
+  -l ${db_type.options_type.l_value}
+          #end if
+          #if str( $db_type.options_type.e_value ) != 'none':
+  -e ${db_type.options_type.e_value}
+          #end if
+          #if str( $db_type.options_type.chunkmbs_value ) != 'none':
+  --chunkmbs ${db_type.options_type.chunkmbs_value}
+          #end if
+      #end if
+  #elif str( $db_type.options_type_selector ) == 'bowtie2':
+  --bowtie2
+      #if str( $db_type.options_type.options_type_selector ) == 'advanced':
+  --${db_type.options_type.fastq_qualities_type_value}
+          #if str( $db_type.options_type.s_value ) != 'none':
+  -s ${db_type.options_type.s_value}
+          #end if
+          #if str( $db_type.options_type.u_value ) != 'none':
+  -u ${db_type.options_type.u_value}
+          #end if
+          #if str( $db_type.options_type.nondirectional_value ) == 'enable':
+  --non_directional
+          #end if
+          #if str( $db_type.options_type.samnohd_value ) == 'enable':
+  --sam-no-hd
+          #end if
+          #if str( $db_type.options_type.N_value ) != 'none':
+  -N ${db_type.options_type.N_value}
+          #end if
+          #if str( $db_type.options_type.L_value ) != 'none':
+  -L ${db_type.options_type.L_value}
+          #end if
+          #if str( $db_type.options_type.D_value ) != 'none':
+  -D ${db_type.options_type.D_value}
+          #end if
+          #if str( $db_type.options_type.R_value ) != 'none':
+  -R ${db_type.options_type.R_value}
+          #end if
+          #if str( $db_type.options_type.score_min_value ) != 'none':
+  --score_min ${db_type.options_type.score_min_value}
+          #end if
+          #if str( $db_type.options_type.most_valid_alignments_value ) != 'none':
+  --most_valid_alignments ${db_type.options_type.most_valid_alignments_value}
+          #end if
+          #if str( $db_type.options_type.chunkmbs_value ) != 'none':
+  --chunkmbs ${db_type.options_type.chunkmbs_value}
+          #end if
+      #end if
+  #end if
+  ${db_type.datasets}
+  #if str( $seq_type.options_type_selector ) == 'single_end':
+  ${seq_type.input1}
+  #elif str( $seq_type.options_type_selector ) == 'pair_end':
+          #if str( $seq_type.I_value ) != 'none':
+  -I ${seq_type.I_value}
+          #end if
+          #if str( $seq_type.X_value ) != 'none':
+  -X ${seq_type.X_value}
+          #end if
+  -1 ${seq_type.input1}
+  -2 ${seq_type.input2}
+  #end if
+  
+  2&gt;&amp;1 || echo "Error running bismark."
+  
+  
+  &amp;&amp; mv ${result_outfile.files_path}/*.sam ${result_outfile}
+  
+  &amp;&amp; mv ${result_outfile.files_path}/*_mapping_report.txt ${log_outfile}
+  
+  </command>
+  <inputs>
+    <conditional name="seq_type">
+        <param name="options_type_selector" type="select" label="Select single/pair end">
+          <option value="single_end" selected="true">Single-end</option>
+          <option value="pair_end">Pair-end</option>
+        </param>
+        <when value="single_end">
+            <param format="fastq" name="input1" type="data" label="FASTQ Sequence"/>
+        </when>
+        <when value="pair_end">
+            <param format="fastq" name="input1" type="data" label="FASTQ Sequence 1"/>
+            <param format="fastq" name="input2" type="data" label="FASTQ Sequence 2"/>
+            <param name="I_value" type="text" value="0" label="The minimum insert size for valid paired-end alignments. E.g. if -I 60 is specified and a paired-end alignment consists of two 20-bp alignments in the appropriate orientation with a 20-bp gap between them, that alignment is considered valid (as long as -X is also satisfied). A 19-bp gap would not be valid in that case. Default: 0. (-I)"/>
+            <param name="X_value" type="text" value="500" label="The maximum insert size for valid paired-end alignments. E.g. if -X 100 is specified and a paired-end alignment consists of two 20-bp alignments in the proper orientation with a 60-bp gap between them, that alignment is considered valid (as long as -I is also satisfied). A 61-bp gap would not be valid in that case. Default: 500. (-X)"/>
+        </when>
+    </conditional>
+    <conditional name="db_type">
+        <param name="options_type_selector" type="select" label="Choose mapper version">
+          <option value="bowtie1" selected="true">bowtie 1</option>
+          <option value="bowtie2">bowtie 2</option>
+        </param>     
+        <when value="bowtie1">
+          <param name="datasets" type="select" label="Choose the genome database to map">
+            <options from_file="bismark_genome_db.loc">
+               <column name="name" index="0"/>
+               <column name="value" index="2"/>
+               <column name="bowtie_version" index="1"/>
+               <filter type="static_value" column="1" value="bowtie1"/>
+            </options>
+          </param>
+           <conditional name="options_type">
+             <param name="options_type_selector" type="select" label="Basic/Advanced Option">
+               <option value="basic" selected="true">Basic</option>
+               <option value="advanced">Advanced</option>
+             </param>
+             <when value="advanced">
+                 <param name="s_value" type="text" value="none" label="Skip (i.e. do not align) the first -int- reads or read pairs from the input. (-s)"/>
+                 <param name="u_value" type="text" value="none" label="Only aligns the first -int- reads or read pairs from the input. Default: no limit. (-u)"/>
+                 <param name="fastq_qualities_type_value" type="select" label="Select the FastQ qualities type">
+                   <option value="phred33-quals" selected="true">phred33-quals</option>
+                   <option value="phred64-quals">phred64-quals</option>
+                   <option value="solexa-quals">solexa-quals</option>
+                   <option value="solexa1.3-quals">solexa1.3-quals</option>
+                 </param>
+                 <param name="nondirectional_value" type="select" label="The sequencing library was constructed in a non strand-specific manner, alignments to all four bisulfite strands will be reported. Default: OFF. (--non_directional)">
+                   <option value="none" selected="true">Disable</option>
+                   <option value="enable">Enable</option>
+                 </param>
+                 <param name="samnohd_value" type="select" label="Suppress SAM header lines (starting with @). This might be useful when very large input files are split up into several smaller files to run concurrently and the output files are to be merged afterwards. Default: OFF. (--sam-no-hd)">
+                   <option value="none" selected="true">Disable</option>
+                   <option value="enable">Enable</option>
+                 </param>
+                 <param name="n_value" type="text" value="2" label="The maximum number of mismatches permitted in the 'seed', i.e. the first base pairs of the read (where L is set with -l/--seedlen). This may be 0, 1, 2 or 3 and the default is 2. This option is only available for Bowtie 1 (for Bowtie 2 see -N). (-n)"/>
+                 <param name="l_value" type="text" value="28" label="The 'seed length' i.e., the number of bases of the high quality end of the read to which the -n ceiling applies. The default is 28. Bowtie (and thus Bismark) is faster for larger values of -l. This option is only available for Bowtie 1 (for Bowtie 2 see -L). (-l)"/>
+                 <param name="e_value" type="text" value="70" label="Maximum permitted total of quality values at all mismatched read positions throughout the entire alignment, not just in the 'seed'. The default is 70. Like Maq, Bowtie rounds quality values to the nearest 10 and saturates at 30. (-e)"/>
+                 <param name="chunkmbs_value" type="text" value="512" label="The number of megabytes of memory a given thread is given to store path descriptors in --best mode. Best-first search must keep track of many paths at once to ensure it is always extending the path with the lowest cumulative cost. Bowtie tries to minimize the memory impact of the descriptors, but they can still grow very large in some cases. If you receive an error message saying that chunk memory has been exhausted in --best mode, try adjusting this parameter up to dedicate more memory to the descriptors. Default: 512. (--chunkmbs)"/>
+              </when>
+           </conditional>
+        </when>
+        <when value="bowtie2">
+          <param name="datasets" type="select" label="Choose the genome database to map">
+            <options from_file="bismark_genome_db.loc">
+               <column name="name" index="0"/>
+               <column name="value" index="2"/>
+               <column name="bowtie_version" index="1"/>
+               <filter type="static_value" column="1" value="bowtie2"/>
+            </options>
+          </param>
+          <conditional name="options_type">
+             <param name="options_type_selector" type="select" label="Basic/Advanced Option">
+               <option value="basic" selected="true">Basic</option>
+               <option value="advanced">Advanced</option>
+             </param>
+             <when value="advanced">
+                 <param name="s_value" type="text" value="none" label="Skip (i.e. do not align) the first -int- reads or read pairs from the input. (-s)"/>
+                 <param name="u_value" type="text" value="none" label="Only aligns the first -int- reads or read pairs from the input. Default: no limit. (-u)"/>
+                 <param name="fastq_qualities_type_value" type="select" label="Select the FastQ qualities type">
+                   <option value="phred33-quals" selected="true">phred33-quals</option>
+                   <option value="phred64-quals">phred64-quals</option>
+                   <option value="solexa-quals">solexa-quals</option>
+                   <option value="solexa1.3-quals">solexa1.3-quals</option>
+                 </param>
+                 <param name="nondirectional_value" type="select" label="The sequencing library was constructed in a non strand-specific manner, alignments to all four bisulfite strands will be reported. Default: OFF. (--non_directional)">
+                   <option value="none" selected="true">Disable</option>
+                   <option value="enable">Enable</option>
+                 </param>
+                 <param name="samnohd_value" type="select" label="Suppress SAM header lines (starting with @). This might be useful when very large input files are split up into several smaller files to run concurrently and the output files are to be merged afterwards. Default: OFF. (--sam-no-hd)">
+                   <option value="none" selected="true">Disable</option>
+                   <option value="enable">Enable</option>
+                 </param>
+                 <param name="N_value" type="text" value="0" label="Sets the number of mismatches to be allowed in a seed alignment during multiseed alignment. Can be set to 0 or 1. Setting this higher makes alignment slower (often much slower) but increases sensitivity. Default: 0. This option is only available for Bowtie 2 (forBowtie 1 see -n). (-N)"/>
+                 <param name="L_value" type="text" value="20" label="Sets the length of the seed substrings to align during multiseed alignment. Smaller values make alignment slower but more senstive. Default: the --sensitive preset of Bowtie 2 is used by default, which sets -L to 20. This option is only available for Bowtie 2 (for Bowtie 1 see -l). (-L)"/>
+                 <param name="D_value" type="text" value="15" label="Up to -int- consecutive seed extension attempts can 'fail' before Bowtie 2 moves on, using the alignments found so far. A seed extension 'fails' if it does not yield a new best or a new second-best alignment. Default: 15. (-D)"/>
+                 <param name="R_value" type="text" value="2" label="-int- is the maximum number of times Bowtie 2 will 're-seed' reads with repetitive seeds. When 're-seeding,' Bowtie 2 simply chooses a new set of reads (same length, same number of mismatches allowed) at different offsets and searches for more alignments. A read is considered to have repetitive seeds if the total number of seed hits divided by the number of seeds that aligned at least once is greater than 300. Default: 2. (-R)"/>
+                 <param name="score_min_value" type="text" value="none" label="Sets a function governing the minimum alignment score needed for an alignment to be considered 'valid' (i.e. good enough to report). This is a function of read length. For instance, specifying L,0,-0.2 sets the minimum-score function f to f(x) = 0 + -0.2 * x, where x is the read length. See also: setting function options at http://bowtie-bio.sourceforge.net/bowtie2. The default is L,0,-0.2. (--score_min)"/>
+                 <param name="most_valid_alignments_value" type="text" value="none" label="This is the Bowtie 2 parameter -M. Bowtie 2 searches for at most -int-+1 distinct, valid alignments for each read. The search terminates when it cannot find more distinct valid alignments, or when it finds -int-+1 distinct alignments, whichever happens first. Only the best alignment is reported. Information from the other alignments is used to estimate mapping quality and to set SAM optional fields, such as AS:i and XS:i. Increasing -M makes Bowtie 2 slower, but increases the likelihood that it will pick the correct alignment for a read that aligns many places. for reads that have more than -int- +1 distinct, valid alignments, Bowtie 2 does not guarantee that the alignment reported is the best possible in terms of alignment score. -M is always used and its default value is set to 10. (--most_valid_alignments)"/>
+                 <param name="chunkmbs_value" type="text" value="512" label="The number of megabytes of memory a given thread is given to store path descriptors in --best mode. Best-first search must keep track of many paths at once to ensure it is always extending the path with the lowest cumulative cost. Bowtie tries to minimize the memory impact of the descriptors, but they can still grow very large in some cases. If you receive an error message saying that chunk memory has been exhausted in --best mode, try adjusting this parameter up to dedicate more memory to the descriptors. Default: 512. (-chunkmbs)"/>
+                 <param name="I_value" type="text" value="0" label="The minimum insert size for valid paired-end alignments. E.g. if -I 60 is specified and a paired-end alignment consists of two 20-bp alignments in the appropriate orientation with a 20-bp gap between them, that alignment is considered valid (as long as -X is also satisfied). A 19-bp gap would not be valid in that case. Default: 0. (-I)"/>
+                 <param name="X_value" type="text" value="500" label="The maximum insert size for valid paired-end alignments. E.g. if -X 100 is specified and a paired-end alignment consists of two 20-bp alignments in the proper orientation with a 60-bp gap between them, that alignment is considered valid (as long as -I is also satisfied). A 61-bp gap would not be valid in that case. Default: 500. (-X)"/>
+              </when>
+           </conditional>
+        </when>
+    </conditional>
+
+  </inputs>
+  <outputs>
+    <data format="sam" name="result_outfile" label="${seq_type.input1.name}_BISMARK_SAM">
+          <actions>
+             <action type="metadata" name="dbkey">
+                  <option type="from_file" name="bismark_genome_db.loc" column="3" offset="0">
+                    <filter type="param_value" column="0" value="#" compare="startswith" keep="False"/>
+                    <filter type="param_value" ref="db_type.datasets" column="2"/>
+                  </option>
+             </action>
+          </actions>
+    </data>
+    <data format="txt" name="log_outfile" label="${seq_type.input1.name}_BISMARK_log"/>
+  </outputs>
+  <help>
+.. class:: infomark
+
+Bismark: A tool to map bisulfite converted sequence reads and determine cytosine methylation states
+http://www.bioinformatics.babraham.ac.uk/projects/bismark/
+
+  </help>
+</tool>
